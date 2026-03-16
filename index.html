@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>For My Queen ❤️</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #ff4d6d;
+            --secondary: #ff85a1;
+            --bg: #0b0114;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background-color: var(--bg);
+            font-family: 'Montserrat', sans-serif;
+            color: white;
+            /* touch-action disabled to allow button movement */
+        }
+
+        #star-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; 
+            pointer-events: none; 
+        }
+
+        .floating-heart {
+            position: fixed; 
+            pointer-events: none; 
+            z-index: 2; 
+        }
+
+        .stage {
+            position: absolute; width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            pointer-events: none;
+            z-index: 10;
+            transition: opacity 0.6s ease;
+        }
+
+        .stage.active {
+            opacity: 1; visibility: visible;
+            pointer-events: all;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 30px; border-radius: 30px;
+            text-align: center; width: 85%; max-width: 400px;
+            z-index: 20;
+        }
+
+        .cta {
+            position: relative;
+            z-index: 1000 !important; 
+            background: var(--primary); color: white;
+            border: none; padding: 16px 40px;
+            border-radius: 50px; font-weight: 600;
+            cursor: pointer; margin-top: 20px;
+            box-shadow: 0 10px 25px rgba(255, 77, 109, 0.4);
+            transition: transform 0.2s;
+        }
+
+        /* Funny No Button Styling */
+        #no-btn {
+            background: #555;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .photo-frame {
+            width: 200px; height: 200px;
+            border-radius: 50%; border: 4px solid white;
+            box-shadow: 0 0 25px var(--primary);
+            overflow: hidden; margin: 20px auto;
+        }
+        .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+        .video-box {
+            width: 90%; max-width: 500px; 
+            border-radius: 20px; overflow: hidden;
+            background: #000; border: 2px solid var(--secondary);
+            z-index: 15;
+        }
+
+        h1 { font-family: 'Dancing Script', cursive; font-size: 2.8rem; color: var(--secondary); margin: 10px 0; }
+    </style>
+</head>
+<body>
+
+    <canvas id="star-canvas"></canvas>
+    
+    <audio id="bg-audio" loop preload="auto">
+        <source src="BGM.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="s1" class="stage active">
+        <div class="glass-panel">
+            <img src="image3.gif" width="120">
+            <h1>Oiii... ❤️</h1>
+            <p>I crafted a universe for you.</p>
+            <button class="cta" onclick="beginApp(event)">Begin Journey ✨</button>
+        </div>
+    </div>
+
+    <div id="s2" class="stage">
+        <div style="position:relative; width:100%; height:120px;">
+            <div id="hl" style="position:absolute; left:5%; font-size:70px;">❤️</div>
+            <div id="hr" style="position:absolute; right:5%; font-size:70px;">❤️</div>
+        </div>
+        <h2 id="s2-txt" style="opacity:0; padding:20px; text-align:center;">Connections written in the stars.</h2>
+    </div>
+
+    <div id="s3" class="stage">
+        <h1>Happy Birthday teju! 🎂</h1>
+        <div class="photo-frame">
+            <img src="image2.png" alt="Birthday Queen">
+        </div>
+        <p>"The reason behind this website ❤️"</p>
+        <button class="cta" onclick="changeStage(4)">The Surprise 🎁</button>
+    </div>
+
+    <div id="s4" class="stage">
+        <p>A message from my heart...</p>
+        <div class="video-box">
+            <video id="localVideo" width="100%" playsinline>
+                <source src="video.mp4" type="video/mp4">
+            </video>
+        </div>
+        <button class="cta" onclick="changeStage(5)">Continue ❤️</button>
+    </div>
+
+    <div id="s5" class="stage">
+        <div class="glass-panel">
+            <h1>One Honest Question...</h1>
+            <p>Do you like me? ❤️</p>
+            <div style="display: flex; justify-content: space-around; width: 100%;">
+                <button class="cta" onclick="ans('yes')">YES 💖</button>
+                <button id="no-btn" class="cta" onmouseover="moveNoButton()" onclick="moveNoButton()">NO 🙈</button>
+            </div>
+            <h3 id="reply" style="margin-top:20px;"></h3>
+            <button id="secret-btn" class="cta" style="display:none;" onclick="changeStage(6)">Open Message 💌</button>
+        </div>
+    </div>
+
+    <div id="s6" class="stage">
+        <div class="glass-panel" style="text-align:left; max-height: 80vh; overflow-y: auto;">
+            <h1 style="font-family:'Dancing Script';">My Dearest,</h1>
+            <p>Happy Birthday Teju!<br>Naamma innum nerla meet pannala, un voice kuda ketka chance kidaikkala. Namma rendu perum text messages moolama dhaan pesi irukkom 💬. Unnai naan photo la mattum dhaan paathirukken 📷. Aana sila neram andha photo kooda enakku romba special ah thonum ✨. Unna pathi enakku romba theriyadhu, adhe maari unakkum ennai pathi romba theriyadhu. Aana irundhalum un kitta pesumbodhu naan unnai trust panren 🤍. Sila neram nee anuppura reels illa messages enakku puriyama konjam confusion ah irukkum 🤔, aana adhuvum namma innum orutharai oruthar purinjika try panra part dhaan nu naan nenaikkiren. Enakku theriyadhu yen, aana un kitta pesina konjam calm ah feel aagudhu 🌙. Namma rendu perum strangers madhiri start pannirundhalum, ippove un kitta pesura indha chinna connection kooda enakku romba meaningful ah thonudhu 💫. Adhanala dhaan, unna innum nalla purinjikanum nu enakku aasai irukku… idhu ellam unakku puriyum nu naan namburen 🤍. <br><br>—Mr.Siva</p>
+            <button class="cta" onclick="changeStage(7)">Before you go...</button>
+        </div>
+    </div>
+
+    <div id="s7" class="stage">
+        <p>If there's anything you want to tell me... 😊</p>
+        <a href="https://www.instagram.com/mr.siva_8380_" target="_blank" style="text-decoration:none;">
+            <button class="cta">Tell me what's in your heart💬</button>
+        </a>
+    </div>
+
+    <script>
+        const music = document.getElementById('bg-audio');
+        const localVideo = document.getElementById('localVideo');
+
+        // Starfield Logic
+        const canvas = document.getElementById('star-canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = Array.from({length: 100}, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                s: Math.random() * 2
+            }));
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function animateStars() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            ctx.fillStyle = "white";
+            stars.forEach(s => {
+                ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill();
+                s.y -= 0.4; if(s.y < 0) s.y = canvas.height;
+            });
+            requestAnimationFrame(animateStars);
+        }
+        animateStars();
+
+        function beginApp(e) {
+            if(e) e.stopPropagation();
+            music.play();
+            changeStage(2);
+        }
+
+        function changeStage(num) {
+            const current = document.querySelector('.stage.active');
+            const target = document.getElementById(`s${num}`);
+            
+            if(current) current.classList.remove('active');
+            
+            setTimeout(() => {
+                target.classList.add('active');
+
+                // BGM & VIDEO CONTROL
+                if(num === 4) {
+                    music.pause(); // Video stage vandha music pause aagum
+                    localVideo.play();
+                } else {
+                    localVideo.pause();
+                    localVideo.currentTime = 0; // Reset video
+                    if (num > 1) music.play(); // Other stages la music play aagum
+                }
+
+                if(num === 2) {
+                    gsap.to("#hl", {x: (window.innerWidth/2)-60, duration: 2, ease: "power2.inOut"});
+                    gsap.to("#hr", {x: -(window.innerWidth/2)+60, duration: 2, ease: "power2.inOut", onComplete: () => {
+                        gsap.to("#s2-txt", {opacity: 1});
+                        setTimeout(() => changeStage(3), 3000);
+                    }});
+                }
+                if(num === 3) confetti();
+            }, 300);
+        }
+
+        // FUNNY NO BUTTON LOGIC
+        function moveNoButton() {
+            const btn = document.getElementById('no-btn');
+            const maxX = window.innerWidth - btn.offsetWidth;
+            const maxY = window.innerHeight - btn.offsetHeight;
+            
+            const randomX = Math.random() * maxX;
+            const randomY = Math.random() * maxY;
+            
+            btn.style.position = 'fixed';
+            btn.style.left = randomX + 'px';
+            btn.style.top = randomY + 'px';
+            
+            document.getElementById('reply').innerText = "Try to catch me! 😜";
+        }
+
+        function ans(c) {
+            const r = document.getElementById('reply');
+            if(c === 'yes') {
+                r.innerText = "Un answer enakku romba special,Because naanum unnai like panren ❤️";
+                const noBtn = document.getElementById('no-btn');
+                noBtn.style.display = 'none'; // Hide funny button once she says yes
+                document.getElementById('secret-btn').style.display = 'inline-block';
+                confetti();
+            }
+        }
+
+        setInterval(() => {
+            const h = document.createElement('div');
+            h.innerHTML = "❤️"; h.className = "floating-heart";
+            h.style.left = Math.random() * 100 + "vw";
+            h.style.top = "110vh";
+            document.body.appendChild(h);
+            gsap.to(h, { y: "-120vh", opacity: 0, duration: 8, onComplete: () => h.remove() });
+        }, 1500);
+    </script>
+</body>
+</html>
